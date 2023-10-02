@@ -31,6 +31,7 @@ def read_db():
         array.append(row)
     dfa = pd.DataFrame(array)
     dfa.columns = ["year","title","published_at","updated_at","category","nominee","artist","workers","img","winner"]
+    dfa.to_csv("db.csv")
     print(dfa)
     cursor.close()
 
@@ -38,6 +39,7 @@ def read_db():
 def read_csv():
 #################CSV#####################
     df = pd.read_csv('spotify_dataset.csv', sep=',',index_col=0)
+    df.to_csv("filecsv.csv")
     print('CVS')
     print(df)
 
