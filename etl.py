@@ -30,6 +30,7 @@ def read_db():
     for row in results:
         array.append(row)
     dfa = pd.DataFrame(array)
+    dfa.columns = ["year","title","published_at","updated_at","category","nominee","artist","workers","img","winner"]
     print(dfa)
     cursor.close()
 
