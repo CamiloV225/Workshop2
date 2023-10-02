@@ -1,6 +1,5 @@
 import psycopg2
 import matplotlib.pyplot as plt
-import pandas as pd
 import json
 
 def connect_postgres():
