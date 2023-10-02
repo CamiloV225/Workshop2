@@ -24,14 +24,14 @@ def create_table():
 
     cursor.execute("""CREATE TABLE grammyawards (
         year integer,
-        title varchar(255),
-        published_at datetime,
-        updated_at datetime,
-        category varchar(255),
-        nominee varchar(255),
-        artist varchar(255),
-        workers varchar(255),
-        img varchar(255),
+        title varchar,
+        published_at timestamp,
+        updated_at timestamp,
+        category varchar,
+        nominee varchar,
+        artist varchar,
+        workers varchar,
+        img varchar,
         winner boolean     
     )""")
 
@@ -52,6 +52,6 @@ def insert_to_table():
 
 if __name__ == "__main__":
     connection = connect_postgres()
-
+    create_table() 
     insert_to_table()
 
