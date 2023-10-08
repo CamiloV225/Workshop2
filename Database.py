@@ -1,6 +1,7 @@
 import psycopg2
 import matplotlib.pyplot as plt
 import json
+import pandas as pd
 
 def connect_postgres():
     with open('C:/Users/camil/OneDrive/Documents/GitHub/Workshop2/db_config.json') as f:
@@ -42,12 +43,16 @@ def create_table():
 def insert_to_table():
     connection = connect_postgres()
     cursor = connection.cursor()
-    with open("the_grammy_awards.csv", "r", encoding="utf-8") as f: 
+    df = pd.read_csv('the_grammy_awards.csv', index_col=0)
+    new = df.to_csv("newgrammyfile.csv", sep=";")
+    with open("newgrammyfile.csv", "r", encoding="utf-8") as f: 
         next(f)
         cursor.copy_from(f, "grammyawards", sep=";")
     connection.commit()
     cursor.close()
     connection.close()
+
+
 
 if __name__ == "__main__":
     connection = connect_postgres()

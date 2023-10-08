@@ -19,7 +19,6 @@ def connect_postgres():
 
 def read_db():
     array = []
-################Database#################
     connection = connect_postgres()
     cursor = connection.cursor()
     query = cursor.execute("""SELECT * FROM grammyawards""")
@@ -31,24 +30,29 @@ def read_db():
         array.append(row)
     dfa = pd.DataFrame(array)
     dfa.columns = ["year","title","published_at","updated_at","category","nominee","artist","workers","img","winner"]
-    dfa.to_csv("db.csv")
     print(dfa)
     cursor.close()
+    return dfa
 
 
 def read_csv():
-#################CSV#####################
     df = pd.read_csv('spotify_dataset.csv', sep=',',index_col=0)
-    df.to_csv("filecsv.csv")
     print('CVS')
     print(df)
+    return df
 
-def transform_db():
-    print()
+def transform_db(dfa):
+    print("TRANSFORMACION DB")
+    print(dfa)
 
-def transform_csv():
-    print()
+def transform_csv(df):
+############DROPS###########
+    newdf = df.drop(["track_id","tempo","valence","liveness","instrumentalness","time_signature","danceability","speechiness"], axis=1)
+    print("TRANSFORMACION CSV")
+    print(newdf)
 
 if __name__ == "__main__":
-    read_csv()
-    read_db()
+    dfa = read_db()
+    df = read_csv()
+    transform_db(dfa)
+    transform_csv(df)
