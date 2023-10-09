@@ -43,11 +43,10 @@ def create_table():
 def insert_to_table():
     connection = connect_postgres()
     cursor = connection.cursor()
-    df = pd.read_csv('the_grammy_awards.csv', index_col=0)
-    new = df.to_csv("newgrammyfile.csv", sep=";")
-    with open("newgrammyfile.csv", "r", encoding="utf-8") as f: 
-        next(f)
-        cursor.copy_from(f, "grammyawards", sep=";")
+    cursor.execute("""
+    COPY grammyawards(year, title, published_at, updated_at, category, nominee, artist, workers, img, winner)
+    FROM 'C:/The_grammy_awards.csv' WITH DELIMITER ',' CSV HEADER;
+    """)
     connection.commit()
     cursor.close()
     connection.close()
