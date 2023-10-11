@@ -42,7 +42,8 @@ def transform_db(**kwargs):
     grammy = pd.json_normalize(data=json_data)
 
     grammy.drop(columns=['year', 'title','published_at','updated_at','workers','img'])
-    grammy.rename(columns={ 'winner':'nominated'}, inplace=True)
+    newcol = { 'winner':'nominated'}
+    grammy.rename(columns=newcol, inplace=True)
     logging.info("TRANSFORMACION DE LA DB REALIZADA")
     print(grammy)
     return grammy.to_json(orient='records')
@@ -61,17 +62,17 @@ def transform_csv(**kwargs):
     json_data = json.loads(str_data)
     spotify = pd.json_normalize(data=json_data)
 
-############### Cambios a Bailabilidad ##################
+    spotify['duracion'] = (spotify['duration_ms'] / 60000).round(2)
+
     rangos1 = [0, 0.3, 0.6, 1.0]
     tipos_bailabilidad = ['Poca bailabilidad', 'Bailabilidad Moderada', 'Bailabilidad Alta']
     spotify['cat_danceability'] = pd.cut(spotify['danceability'], bins=rangos1, labels=tipos_bailabilidad, right=False)
     
-############## Cambios a Popularidad ###################3
     rangos2 = [0, 30, 60, 100]
     tipos_popularidad = ['Poca Popularidad', 'Media Popularidad', 'Mucha Popularidad']
     spotify['popularity'] = pd.cut(spotify['popularity'], bins=rangos2, labels=tipos_popularidad, right=False)
 
-############# Cambios a Ruido ######################
+
     valor_minimo = spotify["loudness"].min()
     valor_maximo = spotify["loudness"].max()    
     columnadecibeles = spotify['loudness']
@@ -79,7 +80,7 @@ def transform_csv(**kwargs):
     spotify['loudness'] = columna_decibeles_normalizada
     spotify['loudness'] = pd.cut(spotify['loudness'], bins=rangos1, labels=['Canciones Ruido Bajo', 'Canciones con Ruido Moderado', 'Canciones Muy Ruidozas'], right=False)
 
-################ Cambios a Energia ########################
+
     tipos_energia = ['Canciones Tranquilas', 'Canciones con Energía Moderada', 'Canciones Muy Enérgicas']
     spotify['energy'] = pd.cut(spotify['energy'], bins=rangos1, labels=tipos_energia, right=False)
 
@@ -101,25 +102,13 @@ def merge(**kwargs):
     json_data = json.loads(str_data)
     grammy = pd.json_normalize(data=json_data)
 
-    df = spotify.merge(grammy, how='left', left_on='track_name')
+    df = spotify.merge(grammy, how='left', left_on='track_name', right_on='nominee')
 
-    df.to_csv('/home/camilo/airflow_test/Grammy-Spotifty.csv')
+    df.to_csv('/home/camilo/airflow_test/results.csv')
 
     logging.info("MERCHEADO aishhhh")
     return df.to_json(orient='records')
 
 
-def load(**kwargs):
-    ti = kwargs["ti"]
-    str_data = ti.xcom_pull(task_ids="merge")
-    json_data = json.loads(str_data)
-    df = pd.json_normalize(data=json_data)
-
-    create_table = f"""CREATE TABLE IF NOT EXISTS grammyspotify (
-        columna1 TIPO_DE_DATO1,
-        columna2 TIPO_DE_DATO2,
-
-        )
-        """
+def load():
     pass
-
