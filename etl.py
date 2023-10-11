@@ -1,28 +1,28 @@
 import pandas as pd
 import logging
-import psycopg2
+import mysql.connector
 import json
 
-def connect_postgres():
-    with open('db_config.json') as f:
+def connect_mysql():
+    with open('/home/camilo/airflow_test/db_config.json') as f:
         dbfile = json.load(f)
-    connection = psycopg2.connect(
-        database=dbfile["database"],
+    
+    connection = mysql.connector.connect(
+        host=dbfile["host"],
         user=dbfile["user"],
         password=dbfile["password"],
-        host="localhost",
-        port=5432
+        database=dbfile["database"]
     )
+    
     print("Database connection ok")
     return connection
     
 ###################BASE DE DATOS##################
 def read_db():
     array = []
-    connection = connect_postgres()
+    connection = connect_mysql()
     cursor = connection.cursor()
     cursor.execute("""SELECT * FROM grammyawards""")
-    connection.commit()
     results = cursor.fetchall()
     print('BASE DE DATOS')
 
@@ -51,7 +51,7 @@ def transform_db(**kwargs):
 
 #################### CSV ###########################3
 def read_csv():
-    df = pd.read_csv('spotify_dataset.csv', sep=',',index_col=0)
+    df = pd.read_csv('/home/camilo/airflow_test/spotify_dataset.csv', sep=',',index_col=0)
     print('CVS')
     print(df)
     return df.to_json(orient='records')
@@ -78,8 +78,7 @@ def transform_csv(**kwargs):
     columnadecibeles = spotify['loudness']
     columna_decibeles_normalizada = (columnadecibeles - valor_minimo) / (valor_maximo - valor_minimo)
     spotify['loudness'] = columna_decibeles_normalizada
-    tipos_ruido = ['Canciones Ruido Bajo', 'Canciones con Ruido Moderado', 'Canciones Muy Ruidozas']
-    spotify['loudness'] = pd.cut(spotify['loudness'], bins=rangos1, labels=tipos_ruido, right=False)
+    spotify['loudness'] = pd.cut(spotify['loudness'], bins=rangos1, labels=['Canciones Ruido Bajo', 'Canciones con Ruido Moderado', 'Canciones Muy Ruidozas'], right=False)
 
 
     tipos_energia = ['Canciones Tranquilas', 'Canciones con Energía Moderada', 'Canciones Muy Enérgicas']
@@ -105,15 +104,11 @@ def merge(**kwargs):
 
     df = spotify.merge(grammy, how='left', left_on='track_name', right_on='nominee')
 
+    df.to_csv('/home/camilo/airflow_test/results.csv')
+
     logging.info("MERCHEADO aishhhh")
     return df.to_json(orient='records')
 
 
 def load():
     pass
-
-""" if __name__ == "__main__":
-    dfa = read_db()
-    df = read_csv()
-    transform_db()
-    transform_csv() """
