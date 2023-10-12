@@ -41,11 +41,11 @@ def transform_db(**kwargs):
     json_data = json.loads(str_data)
     grammy = pd.json_normalize(data=json_data)
 
-    grammy.drop(columns=['year', 'title','published_at','updated_at','workers','img'])
-    grammy.rename(columns={ 'winner':'nominated'}, inplace=True)
+    newgramm=grammy.drop(['year','published_at','updated_at','workers','img'], axis = 1)
+    newgramm.rename(columns={ 'winner':'nominated'}, inplace=True)
     logging.info("TRANSFORMACION DE LA DB REALIZADA")
-    print(grammy)
-    return grammy.to_json(orient='records')
+    print(newgramm)
+    return newgramm.to_json(orient='records')
 
 
 #################### CSV ###########################3
@@ -60,6 +60,7 @@ def transform_csv(**kwargs):
     str_data = ti.xcom_pull(task_ids="read_csv")
     json_data = json.loads(str_data)
     spotify = pd.json_normalize(data=json_data)
+    spotify = spotify.fillna('')
 
 ############### Cambios a Bailabilidad ##################
     rangos1 = [0, 0.3, 0.6, 1.0]
@@ -83,7 +84,7 @@ def transform_csv(**kwargs):
     tipos_energia = ['Canciones Tranquilas', 'Canciones con Energía Moderada', 'Canciones Muy Enérgicas']
     spotify['energy'] = pd.cut(spotify['energy'], bins=rangos1, labels=tipos_energia, right=False)
 
-    newspotify =spotify.drop(['track_id','tempo','valence','liveness','instrumentalness','time_signature','speechiness', 'duration_ms','mode','key'], axis=1)
+    newspotify =spotify.drop(['track_id','tempo','valence','liveness','instrumentalness','time_signature','speechiness', 'duration_ms','mode','key', 'explicit','acousticness','artists'], axis=1)
     
     logging.info("TRANSFORMACION DEL CSV REALIZADO")
     print(spotify)
@@ -101,25 +102,53 @@ def merge(**kwargs):
     json_data = json.loads(str_data)
     grammy = pd.json_normalize(data=json_data)
 
-    df = spotify.merge(grammy, how='left', left_on='track_name')
-
-    df.to_csv('/home/camilo/airflow_test/Grammy-Spotifty.csv')
-
+    df = spotify.merge(grammy, how='left', left_on='track_name', right_on='nominee')
+    
     logging.info("MERCHEADO aishhhh")
     return df.to_json(orient='records')
 
 
 def load(**kwargs):
+    logging.info("Iniciando la carga del nuevo csv")
+    connection = connect_mysql()
+    cursor = connection.cursor()
     ti = kwargs["ti"]
     str_data = ti.xcom_pull(task_ids="merge")
     json_data = json.loads(str_data)
     df = pd.json_normalize(data=json_data)
 
-    create_table = f"""CREATE TABLE IF NOT EXISTS grammyspotify (
-        columna1 TIPO_DE_DATO1,
-        columna2 TIPO_DE_DATO2,
+    df = df.fillna('')
+   
 
+    create_table = f"""CREATE TABLE IF NOT EXISTS grammyspotify (
+        artist VARCHAR(255),
+        nominee VARCHAR(255),
+        popularity VARCHAR(255),
+        danceability VARCHAR(255),
+        energy VARCHAR(255),
+        loudness VARCHAR(255),
+        track_genre VARCHAR(255),
+        cat_danceability VARCHAR(255),
+        title VARCHAR(255),
+        category VARCHAR(255),
+        nominated VARCHAR(255)
         )
         """
-    pass
+    cursor.execute(create_table)
+    logging.info("Tabla creada")
+    for index, row in df.iterrows():
+            query = f"INSERT INTO grammyspotify (artist, nominee, popularity, danceability, energy, loudness, track_genre, cat_danceability,title,category,nominated) VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s)"
+            cursor.execute(query, (row["artist"],row["nominee"],row["popularity"],row["danceability"],row["energy"],row["loudness"],row["track_genre"],row["cat_danceability"],row["title"],row["category"],row["nominated"]))
+            connection.commit()
+    logging.info("Datos Insertados")
+    return df.to_json(orient='records') 
+
+def store(**kwargs):
+    logging.info("Iniciando Store")
+    ti = kwargs["ti"]
+    str_data = ti.xcom_pull(task_ids="merge")
+    json_data = json.loads(str_data)
+    df = pd.json_normalize(data=json_data)
+
+    df.to_csv('/home/camilo/airflow_test/Grammy-Spotifty.csv')
 

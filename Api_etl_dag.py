@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models.baseoperator import chain
 from datetime import datetime
-from etl import read_csv, read_db, transform_csv, transform_db, merge, load
+from etl import read_csv, read_db, transform_csv, transform_db, merge, load, store
 
 default_args = {
     'owner': 'airflow',
@@ -58,7 +58,7 @@ with DAG(
 
     store = PythonOperator(
         task_id='store',
-        python_callable=func1,
+        python_callable=store,
         provide_context = True,
         )
 

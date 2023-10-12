@@ -2,6 +2,8 @@ import pandas as pd
 import logging
 import mysql.connector
 import json
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
 
 def connect_mysql():
     with open('/home/camilo/airflow_test/db_config.json') as f:
@@ -42,6 +44,7 @@ def transform_db(dfa):
     grammy.rename(columns=newcol, inplace=True)
     print(f"GRAMMY")
     print(grammy)
+    return grammy
 
 #################### CSV ###########################3
 def read_csv():
@@ -77,8 +80,30 @@ def transform_csv(df):
 
     newspotify.to_csv("result.csv")
 
+    return newspotify
+
+    
+def merge(transdb, transcv):
+    dfba= transdb
+    dfcv= transcv
+    df = dfcv.merge(dfba, how='left', left_on='track_name')
+
+    df.to_csv('Grammy-Spotifty.csv')
+
+    logging.info("MERCHEADO aishhhh")
+    return df
+
+def store():
+
+    gauth = GoogleAuth()
+    gauth.LocalWebserverAuth()
+    drive = GoogleDrive(gauth)
+
+    df.to_csv('/home/camilo/airflow_test/Grammy-Spotifty.csv')
+
 if __name__ == "__main__":
     dfa = read_db()
     df = read_csv()
-    transform_db(dfa)
-    transform_csv(df)
+    transdb= transform_db(dfa)
+    transcv= transform_csv(df)
+    meg = merge(transdb, transcv)
