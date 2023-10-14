@@ -38,6 +38,10 @@ mkdir airflow_exercise
 airflow scherduler
 airflow standalone
 ```
+5. Finally, open your web browser of preference and dile 'Localhost:8080', and trigger the api_dag, it will appear in the list of dags:
+```
+localhost:8080
+```
 
 ## Results
 Detailed results of the analysis, including key visualizations and significant findings, are presented in the notebooks provided in this repository. It is recommended to review the notebooks to gain a full understanding of the patterns and trends uncovered during the analysis of the Spotify and Grammy datasets.
