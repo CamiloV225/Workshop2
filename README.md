@@ -14,10 +14,12 @@ Here are the steps to set up the tool needed for this project:
 First off, you would need a virtual machine or the equivalent of an WSL terminal, in my case i'm using wsl from the Microsoft Store: Ubuntu 22.04.
 
 Once you setup your machine, you would need to install the following libraries to make it work:
+NOTE: I recommend using a Virtual Enviroment for python, it will be better and even more organized than other projects.
 
 ```
 pip install pandas apache-airflow mysql-connector-python mysqlclient pymysql
 ```
+ 
 
 ## Results
 Detailed results of the analysis, including key visualizations and significant findings, are presented in the notebooks provided in this repository. It is recommended to review the notebooks to gain a full understanding of the patterns and trends uncovered during the analysis of the Spotify and Grammy datasets.
