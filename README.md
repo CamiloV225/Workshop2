@@ -1,4 +1,4 @@
-# Workshop2: Análisis de Datos de Canciones de Spotify y Premios Grammy
+# Workshop2: Spotify and Grammy Awards Song Data Analysis
 
 This project focuses on the analysis and integration of datasets related to songs from the Spotify platform and the Grammy Awards. Through a series of data extraction, transformation and loading (ETL) steps, a comprehensive analysis of the musical characteristics of the songs, as well as their correlation with the awards received at the Grammy Awards, was performed. The project encompassed several stages, from data manipulation and cleaning to the creation of meaningful visualizations for a deeper understanding of musical patterns and trends.
 
