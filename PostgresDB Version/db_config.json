@@ -1,7 +1,0 @@
-{
-    "database":"Workshop2",
-    "user": "postgres",
-    "password": "Ronny1212",
-    "host": "localhost",
-    "port": 5432
-}
